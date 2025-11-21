@@ -1,68 +1,86 @@
+@import url("https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
-/* Hide scrollbar */
-::-webkit-scrollbar {
-  display: none;
-}
-
-/* Light Theme Variables */
 :root {
-  --background: #F7FFF7;            /* Light background */
-  --foreground: #1B4332;            /* Dark text */
+  --background: #f2fff5;
+  --foreground: #0f1f16;
 
-  --primary: #249a2c;               /* Main brand green */
-  --primary-foreground: #ffffff;    /* Text on primary */
+  --primary: #1d8a52;
+  --primary-foreground: #f6fff8;
 
-  --secondary: #FFD166;             /* Warm yellow highlights */
-  --secondary-foreground: #1B4332;  /* Text on secondary */
+  --secondary: #c3f584;
+  --secondary-foreground: #0f291a;
 
-  --accent: #06D6A0;                /* Mint green accent */
-  --heading-color: #005606;         /* Heading color */
-  --subtle-text: #4F6D5F;           /* Subtle text / secondary text */
+  --accent: #04aa6d;
+  --heading-color: #054732;
+  --subtle-text: #4a6a5a;
 
-  --border: #3CB043;                /* Border color */
-  --muted: #E5F6E0;                 /* Muted background / cards */
-  --muted-foreground: #1B4332;      /* Text on muted background */
+  --border: #b9d8c4;
+  --muted: #e3f6ea;
+  --muted-foreground: #0f1f16;
+
+  --card: #ffffff;
+  --card-foreground: #0f1f16;
 }
 
-/* Dark Theme Variables (optional) */
 [data-theme="dark"] {
-  --background: #1B4332;            /* Dark green background */
-  --foreground: #F7FFF7;            /* Light text */
-
-  --primary: #06D6A0;               /* Accent as primary */
-  --primary-foreground: #1B4332;
-
-  --secondary: #015607;             /* Darker green secondary */
-  --secondary-foreground: #F7FFF7;
-
-  --accent: #FFD166;                /* Yellow accent */
-  --heading-color: #06D6A0;
-  --subtle-text: #C0E8D5;
-
-  --border: #06D6A0;
-  --muted: #14532D;
-  --muted-foreground: #F7FFF7;
+  --background: #041b13;
+  --foreground: #f5fff7;
+  --primary: #58ffb0;
+  --primary-foreground: #00301c;
+  --secondary: #2d3b2f;
+  --secondary-foreground: #eaffec;
+  --accent: #2dd19d;
+  --heading-color: #d9ffe8;
+  --subtle-text: #bbd8c6;
+  --border: #295841;
+  --muted: #10261d;
+  --muted-foreground: #f5fff7;
+  --card: #10261d;
+  --card-foreground: #f5fff7;
 }
 
-/* Tailwind Theme Inline Mapping */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-
   --color-accent: var(--accent);
   --color-heading: var(--heading-color);
   --color-subtle: var(--subtle-text);
-
   --color-border: var(--border);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 }
 
+* {
+  scrollbar-width: none;
+}
 
+*::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  font-family: "Sora", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+}
+
+.glass-panel {
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 40px 120px -60px rgba(4, 70, 35, 0.45);
+  backdrop-filter: blur(15px);
+}

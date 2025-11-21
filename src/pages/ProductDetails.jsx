@@ -1,150 +1,157 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { useAuth } from "../context/AuthProvider";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { getProductById } from "../services/products";
+import Button from "../components/common/Button";
+import Card from "../components/common/Card";
 import BackButton from "../components/common/BackButton";
 
 export default function ProductDetails() {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [cartMessage, setCartMessage] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchProductDetails();
-  }, [productId]);
-
-  const fetchProductDetails = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/products/${productId}`
-      );
-      setProduct(response.data.product);
-    } catch (error) {
-      console.error("Failed to fetch product details:", error);
-    } finally {
-      setLoading(false);
+    async function fetchProduct() {
+      try {
+        setLoading(true);
+        const data = await getProductById(productId);
+        setProduct(data);
+        if (location.state?.buyNow) {
+          setQuantity(1);
+        }
+      } catch (err) {
+        console.error("Failed to load product", err);
+        setError("Unable to load this recipe. Please refresh.");
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    fetchProduct();
+  }, [productId, location.state]);
 
   const handleBuyNow = () => {
     if (!user) {
       navigate("/login");
-    } else {
-      const productWithQuantity = { ...product, quantity };
-      navigate("/checkout/order-summary", { state: { product: productWithQuantity } });
+      return;
     }
-  };
-
-  const handleAddToCart = () => {
-    // Cart functionality will be implemented later
-    alert("Cart functionality coming soon!");
+    navigate("/checkout/order-summary", {
+      state: { product: { ...product, quantity } },
+    });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-secondary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-12 h-12 rounded-full border-4 border-muted border-t-primary animate-spin" />
       </div>
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl text-gray-600">Product not found</p>
+      <div className="min-h-screen flex items-center justify-center bg-background px-5">
+        <Card className="p-10 text-center max-w-lg">
+          <h2 className="text-2xl font-semibold text-heading mb-3">
+            {error || "Product not found"}
+          </h2>
+          <Button onClick={() => navigate("/#products")}>Back to shop</Button>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background px-5 md:px-16 py-24">
       <BackButton />
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="md:flex">
-            {/* Product Image */}
-            <div className="md:w-1/2 p-8 flex items-center justify-center">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full max-w-lg rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
-              />
-            </div>
+      <div className="max-w-6xl mx-auto grid gap-10 lg:grid-cols-2 items-start">
+        <Card className="p-6 md:p-10 bg-card/90 border border-primary/15">
+          <div className="aspect-square rounded-[36px] bg-primary/5 flex items-center justify-center">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-4/5 object-contain drop-shadow-2xl"
+            />
+          </div>
+        </Card>
 
-            {/* Product Info */}
-            <div className="md:w-1/2 p-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
-              <p className="text-gray-600 text-lg mb-6">{product.description}</p>
-              
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-secondary mb-2">₹{product.price}</h2>
-                <p className="text-green-600">In Stock</p>
-              </div>
+        <div className="space-y-6">
+          <p className="text-sm uppercase tracking-[0.4em] text-primary/70">
+            Jar #{productId?.slice(-2)}
+          </p>
+          <h1 className="text-4xl md:text-5xl font-semibold text-heading">
+            {product.name}
+          </h1>
+          <p className="text-lg text-subtle">{product.description}</p>
 
-              {/* Quantity Selector */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quantity
-                </label>
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />
-                    </svg>
-                  </button>
-                  <span className="text-xl font-semibold">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
+          <div className="flex items-center gap-6">
+            <span className="text-3xl font-semibold text-heading">
+              ₹{product.price}
+            </span>
+            <span className="text-sm text-subtle">
+              {Number(product.stock ?? 0) > 6
+                ? "Ready to ship"
+                : `Only ${product.stock ?? 4} jars left`}
+            </span>
+          </div>
 
-              {/* Total Price */}
-              <div className="mb-8">
-                <p className="text-lg text-gray-700">
-                  Total: <span className="font-bold text-xl">₹{(product.price * quantity).toFixed(2)}</span>
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={handleBuyNow}
-                  className="flex-1 bg-secondary text-secondary-foreground px-6 py-3 rounded-full font-semibold hover:bg-muted transition-all text-center"
-                >
-                  Buy Now
-                </button>
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 border-2 border-secondary text-secondary px-6 py-3 rounded-full font-semibold hover:bg-secondary/10 transition-all text-center"
-                >
-                  Add to Cart
-                </button>
-              </div>
-
-              {/* Additional Info */}
-              <div className="mt-8 border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Product Highlights</h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-600">
-                  <li>100% Natural Ingredients</li>
-                  <li>High-Quality Product</li>
-                  <li>Free Shipping</li>
-                  <li>Secure Payment Options</li>
-                </ul>
-              </div>
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-subtle">Quantity</label>
+            <div className="inline-flex items-center gap-6 rounded-full border border-primary/20 px-6 py-3">
+              <button
+                className="text-2xl"
+                onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                aria-label="Decrease quantity"
+              >
+                −
+              </button>
+              <span className="text-2xl font-semibold">{quantity}</span>
+              <button
+                className="text-2xl"
+                onClick={() => setQuantity((prev) => prev + 1)}
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
             </div>
           </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button className="flex-1" onClick={handleBuyNow}>
+              Buy now
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() =>
+                setCartMessage("Cart + subscriptions drop in December.")
+              }
+            >
+              Add to cart
+            </Button>
+          </div>
+
+          {cartMessage && (
+            <p className="text-sm text-subtle">{cartMessage}</p>
+          )}
+
+          <Card className="p-5 border border-primary/10 bg-muted">
+            <h3 className="text-lg font-semibold text-heading mb-3">
+              Ingredient rituals
+            </h3>
+            <ul className="space-y-2 text-subtle">
+              <li>• Stone-ground millet flour & soaked nuts</li>
+              <li>• Cold-pressed coconut oil, no palm oil</li>
+              <li>• Jaggery sweetness & pink salt</li>
+              <li>• Ships in insulated recyclable jars</li>
+            </ul>
+          </Card>
         </div>
       </div>
     </div>

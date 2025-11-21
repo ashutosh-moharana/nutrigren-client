@@ -1,188 +1,160 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useCheckout } from "../../context/CheckoutProvider";
+import Button from "../common/Button";
 
 export default function AddressForm() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const product = location.state?.product;
+  const { product, address, setAddress } = useCheckout();
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    phoneNumber: "",
-    houseNo: "",
-    address: "",
-    landmark: "",
-    city: "",
-    state: "",
-    pincode: "",
-  });
+  const [formData, setFormData] = useState(
+    address || {
+      fullName: "",
+      phoneNumber: "",
+      houseNo: "",
+      address: "",
+      landmark: "",
+      city: "",
+      state: "",
+      pincode: "",
+    }
+  );
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Navigate to payment with both product and address details
-    navigate("/checkout/payment", {
-      state: { 
-        product,
-        address: formData
-      }
-    });
+    setAddress(formData);
+    navigate("/checkout/payment");
   };
 
-  const RequiredStar = () => (
-    <span className="text-red-500 ml-1">*</span>
-  );
+  if (!product) {
+    return (
+      <div className="p-6 text-center text-subtle">
+        Preparing address form…
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-6">Shipping Address</h2>
-      
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-heading">Shipping address</h2>
+        <p className="text-sm text-subtle">
+          We currently deliver PAN India via Bluedart & Delhivery.
+        </p>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            Full Name
-            <RequiredStar />
-          </label>
-          <input
-            type="text"
+        <div className="grid md:grid-cols-2 gap-4">
+          <InputField
+            label="Full name"
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
             required
-            className="w-full p-2 border rounded-md focus:ring-2 focus:ring-secondary"
           />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            Phone Number
-            <RequiredStar />
-          </label>
-          <input
-            type="tel"
+          <InputField
+            label="Phone"
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleChange}
+            type="tel"
             required
-            className="w-full p-2 border rounded-md focus:ring-2 focus:ring-secondary"
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            House/Apartment/Building No.
-            <RequiredStar />
-          </label>
-          <input
-            type="text"
-            name="houseNo"
-            value={formData.houseNo}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded-md focus:ring-2 focus:ring-secondary"
-            placeholder="e.g., Flat 101, Building A"
-          />
-        </div>
+        <InputField
+          label="House / Apartment"
+          name="houseNo"
+          value={formData.houseNo}
+          onChange={handleChange}
+          placeholder="Flat 101, Building A"
+          required
+        />
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            Street Address
-            <RequiredStar />
-          </label>
-          <textarea
+        <div className="grid md:grid-cols-2 gap-4">
+          <InputField
+            label="Street"
             name="address"
             value={formData.address}
             onChange={handleChange}
             required
-            rows="2"
-            className="w-full p-2 border rounded-md focus:ring-2 focus:ring-secondary"
-            placeholder="Street name, Area"
           />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            Landmark
-          </label>
-          <input
-            type="text"
+          <InputField
+            label="Landmark"
             name="landmark"
             value={formData.landmark}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md focus:ring-2 focus:ring-secondary"
-            placeholder="e.g., Near Post Office"
+            placeholder="Opp. Community Park"
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">
-              City
-              <RequiredStar />
-            </label>
-            <input
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-secondary"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">
-              State
-              <RequiredStar />
-            </label>
-            <input
-              type="text"
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-secondary"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            Pincode
-            <RequiredStar />
-          </label>
-          <input
-            type="text"
+        <div className="grid md:grid-cols-3 gap-4">
+          <InputField
+            label="City"
+            name="city"
+            value={formData.city}
+            onChange={handleChange}
+            required
+          />
+          <InputField
+            label="State"
+            name="state"
+            value={formData.state}
+            onChange={handleChange}
+            required
+          />
+          <InputField
+            label="Pincode"
             name="pincode"
             value={formData.pincode}
             onChange={handleChange}
             required
-            className="w-full p-2 border rounded-md focus:ring-2 focus:ring-secondary"
           />
         </div>
 
         <div className="flex justify-between pt-4">
-          <button
+          <Button
             type="button"
-            onClick={() => navigate("/checkout/order-summary", { state: { product } })}
-            className="px-6 py-2 border border-secondary rounded-full text-secondary hover:bg-secondary/10 transition-all"
+            variant="outline"
+            onClick={() => navigate("/checkout/order-summary")}
           >
             Back
-          </button>
-          <button
-            type="submit"
-            className="px-6 py-2 bg-secondary text-secondary-foreground rounded-full hover:bg-muted transition-all"
-          >
-            Continue to Payment
-          </button>
+          </Button>
+          <Button type="submit">Continue to payment</Button>
         </div>
       </form>
     </div>
+  );
+}
+
+function InputField({
+  label,
+  name,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+  required,
+}) {
+  return (
+    <label className="text-sm font-medium text-subtle block space-y-2">
+      <span className="flex items-center gap-1">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </span>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        className="w-full rounded-2xl border border-primary/15 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+      />
+    </label>
   );
 }

@@ -1,81 +1,93 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { FaInstagram, FaFacebookF, FaTwitter } from "react-icons/fa";
 
+const quickLinks = [
+  { id: "shop", label: "Shop", href: "/#products" },
+  { id: "ethos", label: "Ethos", href: "#ethos" },
+  { id: "login", label: "Login", href: "/login" },
+  { id: "register", label: "Register", href: "/register" },
+];
+
+const socialLinks = [
+  { id: "instagram", icon: FaInstagram, href: "#" },
+  { id: "facebook", icon: FaFacebookF, href: "#" },
+  { id: "twitter", icon: FaTwitter, href: "#" },
+];
+
 export default function Footer() {
   return (
-    <footer className="bg-gray-100 py-10 mt-20">
-      <div className="max-w-6xl mx-auto px-5 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-        {/* Brand & Anthem */}
-        <div>
-          <h2 className="text-3xl font-extrabold text-gray-800 mb-2">
+    <footer className="mt-24 bg-foreground text-background">
+      <div className="max-w-6xl mx-auto px-5 py-16 grid gap-12 lg:grid-cols-3">
+        <div className="space-y-4">
+          <p className="text-sm uppercase tracking-[0.3em] text-secondary">
             NutriGren
-          </h2>
-          <p className="text-lg italic text-gray-600">
-            Har Bite Mein Hai Maa Ka Pyaar
+          </p>
+          <h3 className="text-3xl font-display">
+            Modern mithai jars, but make it functional.
+          </h3>
+          <p className="text-base text-background/80">
+            Family-owned micro-bakery in Bengaluru. We only ship what we’d send
+            to our own dinner table.
           </p>
         </div>
 
-        {/* Quick Links */}
         <div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-3">
-            Quick Links
-          </h3>
-          <ul className="space-y-2">
-            <li>
-              <Link to="/" className="hover:text-gray-900 transition-colors">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="#products"
-                className="hover:text-gray-900 transition-colors"
-              >
-                Products
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/login"
-                className="hover:text-gray-900 transition-colors"
-              >
-                Login
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/signup"
-                className="hover:text-gray-900 transition-colors"
-              >
-                Signup
-              </Link>
-            </li>
+          <h4 className="text-xl font-semibold mb-4">Quick links</h4>
+          <ul className="space-y-3 text-background/80">
+            {quickLinks.map((link) => (
+              <li key={link.id}>
+                {link.href.startsWith("/") ? (
+                  <Link className="hover:text-background" to={link.href}>
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a className="hover:text-background" href={link.href}>
+                    {link.label}
+                  </a>
+                )}
+              </li>
+            ))}
           </ul>
         </div>
 
-        {/* Social Media */}
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-3">
-            Follow Us
-          </h3>
-          <div className="flex justify-center md:justify-start space-x-4 text-gray-600">
-            <a href="#" className="hover:text-gray-800 transition-colors">
-              <FaInstagram size={24} />
-            </a>
-            <a href="#" className="hover:text-gray-800 transition-colors">
-              <FaFacebookF size={24} />
-            </a>
-            <a href="#" className="hover:text-gray-800 transition-colors">
-              <FaTwitter size={24} />
-            </a>
+        <div className="space-y-5">
+          <h4 className="text-xl font-semibold">Stay in touch</h4>
+          <p className="text-background/80">
+            Join the drop list for flavor restocks & weekend farmer’s market
+            pop-ups.
+          </p>
+          <form
+            className="flex flex-col sm:flex-row gap-3"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <input
+              type="email"
+              placeholder="Email address"
+              className="flex-1 rounded-full px-5 py-3 text-foreground focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="bg-secondary text-secondary-foreground rounded-full px-6 py-3 font-semibold hover:bg-secondary/80 transition"
+            >
+              Notify me
+            </button>
+          </form>
+          <div className="flex gap-4 text-xl">
+            {socialLinks.map(({ id, icon: Icon }) => (
+              <a
+                key={id}
+                href="#"
+                className="w-10 h-10 rounded-full border border-background/40 flex items-center justify-center hover:bg-background hover:text-foreground transition"
+              >
+                <Icon />
+              </a>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Bottom Text */}
-      <div className="mt-10 text-center text-gray-500">
-        &copy; {new Date().getFullYear()} NutriGren. All rights reserved.
+      <div className="border-t border-white/10 py-6 text-center text-sm text-background/70">
+        © {new Date().getFullYear()} NutriGren Collective. All slow baked.
       </div>
     </footer>
   );

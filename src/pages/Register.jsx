@@ -1,13 +1,17 @@
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import GoogleOAuth from "../services/GoogleOAuth";
-import { useAuth } from "../context/AuthProvider";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../components/common/BackButton";
+import Button from "../components/common/Button";
+import Card from "../components/common/Card";
+import httpClient from "../services/httpClient";
+import { useState } from "react";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { setUser, setToken } = useAuth();
+  const [serverError, setServerError] = useState(null);
   const {
     register,
     handleSubmit,
@@ -15,69 +19,82 @@ export default function Register() {
   } = useForm();
 
   const onSubmit = async (data) => {
+    setServerError(null);
     try {
-      console.log(data);
-      const res = await axios.post("http://localhost:5000/api/auth/register", data, {
-        withCredentials: true,
-      });
-      console.log("Register success:", res.data);
+      const res = await httpClient.post("/api/auth/register", data);
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setUser(res.data.user);
+      setToken(res.data.token);
       navigate("/");
     } catch (err) {
-      console.error("Register failed:", err.response?.data || err.message);
+      setServerError(err.response?.data?.message || "Failed to register.");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen bg-background px-5 py-24 flex items-center justify-center">
       <BackButton />
-      <div className="w-96 bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+      <Card className="w-full max-w-md p-8 space-y-6">
+        <div className="text-center space-y-2">
+          <p className="text-sm uppercase tracking-[0.3em] text-subtle">
+            Join the pantry club
+          </p>
+          <h1 className="text-3xl font-semibold text-heading">
+            Create an account
+          </h1>
+        </div>
 
-        {/* Register Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <input
-            type="text"
-            placeholder="Name"
-            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            {...register("name", { required: true })}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Input
+            label="Name"
+            placeholder="Full name"
+            error={errors.name?.message}
+            {...register("name", { required: "Name is required" })}
           />
-          {errors.name && <p className="text-red-500 text-sm">Name is required</p>}
-
-          <input
+          <Input
+            label="Email"
+            placeholder="you@email.com"
             type="email"
-            placeholder="Email"
-            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            {...register("email", { required: true })}
+            error={errors.email?.message}
+            {...register("email", { required: "Email is required" })}
           />
-          {errors.email && <p className="text-red-500 text-sm">Email is required</p>}
-
-          <input
+          <Input
+            label="Password"
+            placeholder="••••••••"
             type="password"
-            placeholder="Password"
-            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            {...register("password", { required: true })}
+            error={errors.password?.message}
+            {...register("password", { required: "Password is required" })}
           />
-          {errors.password && <p className="text-red-500 text-sm">Password is required</p>}
-
-          <button
-            type="submit"
-            className="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 transition-colors"
-          >
-            Register
-          </button>
+          {serverError && (
+            <p className="text-sm text-red-500 text-center">{serverError}</p>
+          )}
+          <Button type="submit" className="w-full">
+            Create account
+          </Button>
         </form>
 
-        <div className="flex items-center my-4">
-          <hr className="flex-grow border-t border-gray-300" />
-          <span className="px-2 text-gray-500">OR</span>
-          <hr className="flex-grow border-t border-gray-300" />
+        <div className="flex items-center gap-4">
+          <span className="flex-1 h-px bg-border" />
+          <span className="text-xs uppercase tracking-[0.3em] text-subtle">
+            or
+          </span>
+          <span className="flex-1 h-px bg-border" />
         </div>
 
         <GoogleOAuth />
-      </div>
+      </Card>
     </div>
   );
 }
+
+const Input = ({ label, error, ...props }) => (
+  <label className="block text-sm text-subtle space-y-2">
+    {label}
+    <input
+      className="w-full rounded-2xl border border-primary/15 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/30"
+      {...props}
+    />
+    {error && <span className="text-sm text-red-500">{error}</span>}
+  </label>
+);
